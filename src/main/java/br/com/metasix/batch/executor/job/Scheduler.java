@@ -1,5 +1,8 @@
 package br.com.metasix.batch.executor.job;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,6 +45,19 @@ public class Scheduler {
 				.forEach(sol -> {
 					sol .getHistoricoAtual().setStatus(proc.getStatusSolicitacaoDestino());
 					solicitacaoClientResolucao.update(sol);
+				});
+			} else {
+				listProcessamentoLote
+				.stream()
+				.filter(p -> p.getDataUltimoProcessamento().plusDays(p.getQtdDiasProcessar()).toLocalDate() == LocalDate.now())
+				.forEach(p -> {
+					listSolicitacao
+					.stream()
+					.filter(sol -> sol.getHistoricoAtual().getStatus().getId() == p.getStatusOrigem().getId())
+					.forEach(sol -> {
+						sol.getHistoricoAtual().setStatus(p.getStatusSolicitacaoDestino());
+						solicitacaoClientResolucao.update(sol);
+					});
 				});
 			}
 		});
